@@ -1,9 +1,9 @@
 <template>
-  <div id="app">
-    <div class="section section-1" v-on:click="sectorClick(1)"></div>
-    <div class="section section-2" v-on:click="sectorClick(2)"></div>
-    <div class="section section-3" v-on:click="sectorClick(3)"></div>
-    <div class="section section-4" v-on:click="sectorClick(4)"></div>
+  <div id="app" v-bind:class="{clickable: clickable}">
+    <div class="section section-1" v-bind:class="{active: activeSection == 1}" v-on:click="sectorClick(1)"></div>
+    <div class="section section-2" v-bind:class="{active: activeSection == 2}" v-on:click="sectorClick(2)"></div>
+    <div class="section section-3" v-bind:class="{active: activeSection == 3}" v-on:click="sectorClick(3)"></div>
+    <div class="section section-4" v-bind:class="{active: activeSection == 4}" v-on:click="sectorClick(4)"></div>
 
     <ResultNav 
       v-bind:currentScore="currentScore"
@@ -22,11 +22,13 @@ export default {
   data() {
     return {
       targetSeq: [],
-      currentSeq: [],
       currentScore: 0,
       recordScore: 0,
+      sectorsClicked: 0,
       steps: 1,
-      gameStarted: false
+      gameStarted: false,
+      activeSection: 0,
+      clickable: true
     }
   },
   components: {
@@ -37,7 +39,7 @@ export default {
       this.targetSeq = [];
       this.steps = 1;
       this.currentScore = 0;
-      this.currentSeq = [];
+      this.sectorsClicked = 0;
 
       this.targetSeq.push(Math.floor(Math.random() * 4) + 1);
 
@@ -45,14 +47,28 @@ export default {
 
       this.hightligthSectors();
     },
+    endGame() {
+      alert('Game over');
+      this.gameStarted = false;
+
+      if (this.recordScore < this.currentScore) {
+        this.recordScore = this.currentScore;
+      }
+    },
     sectorClick(id) {
       if (this.gameStarted) {
-        this.currentSeq.push(id);
+        if (id == this.targetSeq[this.sectorsClicked]) {
+          this.currentScore++;
 
+          this.sectorsClicked++;
 
-        if (this.currentSeq.length == this.targetSeq.length) {
-          this.nextStep();
+          if (this.sectorsClicked == this.targetSeq.length) {
+            this.nextStep();
+          }
+        } else {
+          this.endGame();
         }
+
       } else {
         this.startGame();
       }
@@ -60,39 +76,27 @@ export default {
     nextStep() {
       this.steps = this.steps + 1;
       this.targetSeq.push(Math.floor(Math.random() * 4) + 1);
-      this.currentSeq = [];
+      this.sectorsClicked = 0;
 
       this.hightligthSectors();
-      console.log(this.steps, "next step");
     },
     hightligthSectors() {
-      let items = [];
       let counter = 0;
+      let $this = this;
+      let timer = 1100;
       function show() {
-        if (counter < items.length) {
+        if (counter < $this.targetSeq.length) {
           setTimeout(function() {
-            // items[counter].classList.add('active');
-            // setTimeout( () => items[counter].classList.remove('active'), 1000);
-            document.getElementsByClassName(items[counter])[0].classList.add('active');
-            setTimeout( () => document.getElementsByClassName(items[counter])[0].classList.remove('active'), 1000);
-            console.log(counter);
+            $this.activeSection = $this.targetSeq[counter];
+            setTimeout( () => $this.activeSection=0, 700);
             counter++;
             show();
-          }, 1000);
+          }, timer);
         }
       }
 
-      for (let i of this.targetSeq) {
-        items.push('section-'+i);
-
-        // for(let item of items){
-        //   item.classList.add('active');
-        //   item.classList.remove('active');
-        // }
-      }
-
       show();
-    }
+    },
   }
 }
 </script>
@@ -116,6 +120,17 @@ body {
   justify-content: flex-start;
   align-items: flex-start;
 
+  &.clickable {
+    .section {
+      &-1, &-2, &-3, &-4 {
+        cursor: pointer;
+        &:hover {
+          opacity: 1;
+        }
+      }
+    }
+  }
+
   .section {
     width: 20%;
     height: 100%;
@@ -138,8 +153,9 @@ body {
 
     &-1, &-2, &-3, &-4 {
       opacity: .5;
+      transition: all .2s ease;
 
-      &:hover, &.active {
+      &.active {
         opacity: 1;
       }
     }  
