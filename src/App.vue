@@ -58,7 +58,6 @@ export default {
     sectorClick(id) {
       if (this.gameStarted) {
         if (id == this.targetSeq[this.sectorsClicked]) {
-          this.currentScore++;
 
           this.sectorsClicked++;
 
@@ -77,6 +76,7 @@ export default {
       this.steps = this.steps + 1;
       this.targetSeq.push(Math.floor(Math.random() * 4) + 1);
       this.sectorsClicked = 0;
+      this.currentScore++;
 
       this.hightligthSectors();
     },
@@ -154,11 +154,26 @@ body {
     &-1, &-2, &-3, &-4 {
       opacity: .5;
       transition: all .2s ease;
+      box-sizing: border-box;
 
       &.active {
         opacity: 1;
+        border: 5px solid	#383838;
       }
     }  
+  }
+
+  @media screen and (orientation: portrait) {
+    flex-direction: column;
+
+    .section {
+      width: 100%;
+      height: 15%;
+
+      &:last-child {
+        height: 40%;
+      }
+    }
   }
 }
 </style>

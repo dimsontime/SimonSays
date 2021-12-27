@@ -22,17 +22,26 @@ export default {
 
 <style scoped lang="scss">
     .section-result {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-        align-items: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      align-items: center;
+
+      .startGame {
+          background: #bada55;
+
+          padding: 30px;
+          border-radius: 10px;
+          cursor: pointer;
+      }
+
+      @media screen and (orientation: portrait) {
+        flex-direction: row;
+        flex-wrap: wrap;
 
         .startGame {
-            background: #bada55;
-
-            padding: 30px;
-            border-radius: 10px;
-            cursor: pointer;
+          width: 100vw;
         }
+      }
     }
 </style>
