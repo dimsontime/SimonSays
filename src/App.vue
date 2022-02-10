@@ -5,6 +5,10 @@
     <div class="section section-3" v-bind:class="{active: activeSection == 3}" v-on:click="sectorClick(3)"></div>
     <div class="section section-4" v-bind:class="{active: activeSection == 4}" v-on:click="sectorClick(4)"></div>
 
+    <div class="game-over" v-bind:class="{active: showGameOver == true}">
+      <div class="text">GAME OVER</div>
+    </div>
+
     <ResultNav 
       v-bind:currentScore="currentScore"
       v-bind:recordScore="recordScore"
@@ -28,7 +32,13 @@ export default {
       steps: 1,
       gameStarted: false,
       activeSection: 0,
-      clickable: true
+      clickable: true,
+      showGameOver: false
+    }
+  },
+  mounted () {
+    if (localStorage.record) {
+      this.recordScore = localStorage.record
     }
   },
   components: {
@@ -48,18 +58,25 @@ export default {
       this.hightligthSectors();
     },
     endGame() {
-      alert('Game over');
       this.gameStarted = false;
-
+      
       if (this.recordScore < this.currentScore) {
         this.recordScore = this.currentScore;
+        localStorage.record = this.recordScore;
       }
+
+      this.showGameOver = true;
+      setTimeout(() => this.showGameOver = false , 2000);
+
+      this.currentScore = 0;
     },
     sectorClick(id) {
       if (this.gameStarted) {
         if (id == this.targetSeq[this.sectorsClicked]) {
 
           this.sectorsClicked++;
+
+          // this.playSound();
 
           if (this.sectorsClicked == this.targetSeq.length) {
             this.nextStep();
@@ -79,6 +96,12 @@ export default {
       this.currentScore++;
 
       this.hightligthSectors();
+    },
+    playSound() {
+      let audio = new Audio();
+      audio.preload = 'auto';
+      audio.src = "https://www.myinstants.com/media/sounds/katon.mp3";
+      audio.play();
     },
     hightligthSectors() {
       let counter = 0;
@@ -119,14 +142,53 @@ body {
   flex-direction: row;
   justify-content: flex-start;
   align-items: flex-start;
+  position: relative;
 
   &.clickable {
     .section {
       &-1, &-2, &-3, &-4 {
         cursor: pointer;
-        &:hover {
-          opacity: 1;
+        position: relative;
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 10px;
+          background: #000;
+          opacity: 0;
+          transition: opacity .2s ease;
         }
+        &:hover {
+          &::before {
+            opacity: 1;
+          }
+        }
+      }
+    }
+  }
+
+  .game-over {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, .7);
+
+    display: none;
+
+    &.active {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+
+      .text {
+        font-size: 20vh;
+        font-weight: 800;
+        color: white;
+        max-width: 100%;
       }
     }
   }
@@ -153,12 +215,11 @@ body {
 
     &-1, &-2, &-3, &-4 {
       opacity: .5;
-      transition: all .2s ease;
+      transition: all .2s ease, border .1s linear;
       box-sizing: border-box;
 
       &.active {
         opacity: 1;
-        border: 5px solid	#383838;
       }
     }  
   }
@@ -173,6 +234,12 @@ body {
       &:last-child {
         height: 40%;
       }
+    }
+  }
+
+  @media screen and (max-width: 600px) {
+    .game-over.active .text {
+      font-size: 7vh;
     }
   }
 }
